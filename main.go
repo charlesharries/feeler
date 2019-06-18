@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -11,96 +10,35 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/charlesharries/feeler/sentiment"
 )
 
-// Sentence : A sentence to have the sentiment analysed
-type Sentence struct {
-	s string
-}
-
-// Sentiment : A breakdown of a sentence's sentiment
-type Sentiment struct {
-	Verdict     string   `json:"verdict"`
-	Score       int      `json:"score"`
-	Comparative float64  `json:"comparative"`
-	Positive    []string `json:"positiveWords"`
-	Negative    []string `json:"negativeWords"`
-}
-
 func main() {
-	router := mux.NewRouter()
+	router := http.NewServeMux()
 
-	router.HandleFunc("/", home).Methods("GET")
-	router.HandleFunc("/", checkSentiment).Methods("POST")
-
-	http.ListenAndServe("localhost:3001", router)
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "{ \"status\": \"works divine\" }")
-}
-
-func checkSentiment(res http.ResponseWriter, req *http.Request) {
-	var body map[string]string
-	json.NewDecoder(req.Body).Decode(&body)
-
-	sentence := body["s"]
-	sentiment := getSentiment(sentence)
-
-	fmt.Println(sentiment)
-
-	res.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(res).Encode(sentiment)
-}
-
-func getSentiment(str string) Sentiment {
-	words := strings.Fields(str)
-	m := getMap("data/AFINN-111.txt")
-
-	sentimentScore := 0
-	var positiveWords []string
-	var negativeWords []string
-
-	for _, word := range words {
-		if val, ok := m[word]; ok {
-			sentimentScore += val
-
-			if val > 0 {
-				positiveWords = append(positiveWords, word)
-			} else if val < 0 {
-				negativeWords = append(negativeWords, word)
-			}
-		}
-	}
-
-	comparative := float64(sentimentScore) / float64(len(words))
-
-	verdict := "POSITIVE"
-	if sentimentScore < 0 {
-		verdict = "NEGATIVE"
-	} else if sentimentScore == 0 {
-		verdict = "NEUTRAL"
-	}
-
-	sentiment := Sentiment{Verdict: verdict, Score: sentimentScore, Comparative: comparative, Positive: positiveWords, Negative: negativeWords}
-
-	return sentiment
-}
-
-func getMap(filename string) map[string]int {
-	file, err := os.Open(filename)
+	// Get the file here
+	file, err := os.Open("data/AFINN-111.txt")
 	if err != nil {
+		// Dont call log.Fatal because it'll crash the whole program
+		// don't call it except for in main()
 		log.Fatal(err)
 	}
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
 
+	afinn := parseAfinn(reader)
+
+	router.HandleFunc("/", home(afinn))
+
+	http.ListenAndServe("localhost:3001", router)
+}
+
+func parseAfinn(file *bufio.Reader) map[string]int {
 	m := make(map[string]int)
 
 	for {
-		line, err := reader.ReadString('\n')
+		line, err := file.ReadString('\n')
 		if err != nil {
 			break
 		}
@@ -115,4 +53,51 @@ func getMap(filename string) map[string]int {
 	}
 
 	return m
+}
+
+func home(afinn map[string]int) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			homeGet(w, r)
+		case "POST":
+			homePost(w, r, afinn)
+		default:
+			io.WriteString(w, "{ \"status\": \"method not allowed\" }")
+		}
+	}
+}
+
+func homeGet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	jsonObj := map[string]string{
+		"status": "works divine",
+	}
+
+	out, err := json.Marshal(jsonObj)
+	if err != nil {
+		http.Error(w, "Couldn't marshal json", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(out)
+}
+
+func homePost(w http.ResponseWriter, r *http.Request, afinn map[string]int) {
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Not right content type bud", 400)
+	}
+
+	req := struct {
+		Sentence *string `json:"s"`
+	}{}
+
+	json.NewDecoder(r.Body).Decode(&req)
+
+	sent := sentiment.NewSentiment(*req.Sentence, afinn)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(sent)
 }
