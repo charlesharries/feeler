@@ -11,7 +11,7 @@ func newAfinn() (map[string]int, error) {
 	a := map[string]int{}
 
 	// Open the file.
-	file, err := os.Open("data/AFINN-111.txt")
+	file, err := os.Open("data/AFINN-165.txt")
 	if err != nil {
 		return a, err
 	}

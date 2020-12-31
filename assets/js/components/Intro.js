@@ -10,9 +10,9 @@ export default function Intro() {
         <a
           target="_blank"
           rel="noreferrer noopener"
-          href="https://github.com/fnielsen/afinn/blob/master/afinn/data/AFINN-111.txt"
+          href="https://github.com/fnielsen/afinn/blob/master/afinn/data/AFINN-en-165.txt"
         >
-          AFINN-111
+          AFINN-165
         </a>
         .
       </p>
