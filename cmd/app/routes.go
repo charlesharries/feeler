@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -51,6 +52,8 @@ func sentimentsPost(w http.ResponseWriter, r *http.Request, app *application) {
 	json.NewDecoder(r.Body).Decode(&req)
 
 	sent := app.analyser.NewSentiment(*req.Sentence)
+
+	fmt.Printf("%#v\n\n", sent)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sent)

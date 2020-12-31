@@ -98,6 +98,9 @@ func (a Analyser) NewSentiment(str string) Sentiment {
 	}
 
 	comparative := float64(sentimentScore) / float64(len(words))
+	if len(words) == 0 {
+		comparative = 0
+	}
 
 	verdict := "POSITIVE"
 	if sentimentScore < 0 {
