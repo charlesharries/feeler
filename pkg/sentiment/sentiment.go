@@ -31,6 +31,7 @@ type Analyser struct {
 // Sentiment is a data breakdown of a string's sentiment.
 type Sentiment struct {
 	Verdict     string   `json:"verdict"`
+	Length      int      `json:"length"`
 	Score       int      `json:"score"`
 	Comparative float64  `json:"comparative"`
 	Positive    []string `json:"positiveWords"`
@@ -45,13 +46,13 @@ func stripPunctuation(str string) string {
 }
 
 // NewAnalyser returns a new analyser for running sentiment analysis against.
-func NewAnalyser(a map[string]int) Analyser {
-	return Analyser{dictionary: a}
+func NewAnalyser(a map[string]int) *Analyser {
+	return &Analyser{dictionary: a}
 }
 
 // valueOf gets the value of a word in the received Analyser's dictionary, or
 // 0 if it doesn't exist in the dictionary.
-func (a Analyser) valueOf(word string) int {
+func (a *Analyser) valueOf(word string) int {
 	if val, ok := a.dictionary[word]; ok {
 		return val
 	}
@@ -60,7 +61,7 @@ func (a Analyser) valueOf(word string) int {
 }
 
 // isNegator determines if a certain word appears in the list of negators.
-func (a Analyser) isNegator(word string) bool {
+func (a *Analyser) isNegator(word string) bool {
 	for _, negator := range negators {
 		if strings.ToLower(word) == negator {
 			return true
@@ -71,7 +72,7 @@ func (a Analyser) isNegator(word string) bool {
 }
 
 // NewSentiment generates a Sentiment result for a given sentence.
-func (a Analyser) NewSentiment(str string) Sentiment {
+func (a *Analyser) NewSentiment(str string) Sentiment {
 	words := strings.Fields(str)
 
 	sentimentScore := 0
@@ -111,9 +112,43 @@ func (a Analyser) NewSentiment(str string) Sentiment {
 
 	return Sentiment{
 		Verdict:     verdict,
+		Length:      len(words),
 		Score:       sentimentScore,
 		Comparative: comparative,
 		Positive:    positiveWords,
 		Negative:    negativeWords,
+	}
+}
+
+// AverageSentiment generates a single average Sentiment from an
+// array of Sentiments.
+func (a *Analyser) AverageSentiment(sentiments ...Sentiment) Sentiment {
+	score := 0
+	words := 0
+	positive := []string{}
+	negative := []string{}
+
+	for _, s := range sentiments {
+		score += s.Score
+		words += s.Length
+
+		positive = append(positive, s.Positive...)
+		negative = append(negative, s.Negative...)
+	}
+
+	verdict := "NEUTRAL"
+	if score > 0 {
+		verdict = "POSITIVE"
+	} else if score < 0 {
+		verdict = "NEGATIVE"
+	}
+
+	return Sentiment{
+		Verdict:     verdict,
+		Length:      words,
+		Score:       score,
+		Comparative: float64(score) / float64(words),
+		Positive:    positive,
+		Negative:    negative,
 	}
 }

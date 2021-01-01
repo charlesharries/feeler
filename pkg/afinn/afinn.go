@@ -1,4 +1,4 @@
-package main
+package afinn
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func newAfinn() (map[string]int, error) {
+func NewAfinn() (map[string]int, error) {
 	a := map[string]int{}
 
 	// Open the file.

@@ -6,12 +6,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/charlesharries/feeler/pkg/afinn"
 	"github.com/charlesharries/feeler/pkg/sentiment"
 )
 
 // application holds most of our state that we'll need across the whole app.
 type application struct {
-	analyser      sentiment.Analyser
+	analyser      *sentiment.Analyser
 	errorLog      *log.Logger
 	templateCache map[string]*template.Template
 }
@@ -22,7 +23,7 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Read the AFINN data.
-	afinn, err := newAfinn()
+	afinn, err := afinn.NewAfinn()
 	if err != nil {
 		log.Fatal(err)
 	}
