@@ -2,3 +2,5 @@
 gin-bin
 node_modules
 static/*
+.env
+data/cache
