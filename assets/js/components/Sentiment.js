@@ -38,13 +38,13 @@ export default function Sentiment({ sentiment }) {
         </SentimentResult>
 
         <Cluster>
-          {sentiment.positiveWords.map((word, i) => (
+          {sentiment.positive_words.map((word, i) => (
             <Tag key={`pos-${word}-${i}`} positive>
               {word}
             </Tag>
           ))}
 
-          {sentiment.negativeWords.map((word, i) => (
+          {sentiment.negative_words.map((word, i) => (
             <Tag key={`neg-${word}-${i}`} positive={false}>
               {word}
             </Tag>

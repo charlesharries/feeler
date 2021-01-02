@@ -34,8 +34,8 @@ type Sentiment struct {
 	Length      int      `json:"length"`
 	Score       int      `json:"score"`
 	Comparative float64  `json:"comparative"`
-	Positive    []string `json:"positiveWords"`
-	Negative    []string `json:"negativeWords"`
+	Positive    []string `json:"positive_words"`
+	Negative    []string `json:"negative_words"`
 }
 
 // stripPunctuation removes any punctuation that could mess up our word lookup.
@@ -76,8 +76,8 @@ func (a *Analyser) NewSentiment(str string) Sentiment {
 	words := strings.Fields(str)
 
 	sentimentScore := 0
-	positiveWords := []string{}
-	negativeWords := []string{}
+	positive_words := []string{}
+	negative_words := []string{}
 
 	// Iterate over each word in the sentence
 	for i, word := range words {
@@ -92,9 +92,9 @@ func (a *Analyser) NewSentiment(str string) Sentiment {
 		sentimentScore += val
 
 		if val > 0 {
-			positiveWords = append(positiveWords, word)
+			positive_words = append(positive_words, word)
 		} else if val < 0 {
-			negativeWords = append(negativeWords, word)
+			negative_words = append(negative_words, word)
 		}
 	}
 
@@ -115,8 +115,8 @@ func (a *Analyser) NewSentiment(str string) Sentiment {
 		Length:      len(words),
 		Score:       sentimentScore,
 		Comparative: comparative,
-		Positive:    positiveWords,
-		Negative:    negativeWords,
+		Positive:    positive_words,
+		Negative:    negative_words,
 	}
 }
 
