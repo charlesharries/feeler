@@ -4,3 +4,5 @@ node_modules
 static/*
 .env
 data/cache
+bin/*
+!bin/.gitkeep
