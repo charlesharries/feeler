@@ -12,13 +12,14 @@ The root route renders a React application with the abovementioned text input. T
 ### Twitter analyser
 I've also included a really simple command line application that receives a Twitter handle and an optional tweet limit and scans that user's Twitter feed for overall sentiment.
 
-## Installation and building
+## Usage
 
 ### Server
-Build the server with the following command:
+You'll need to build the server itself, and then build the Javascript to mount the React application:
 
 ```sh
 go build -o ./bin/app ./cmd/app
+yarn install && yarn build
 ```
 
 Once it's built, you can run it like any other executable:
@@ -49,3 +50,6 @@ For a list of all available flags, you can run `--help` on the executable:
 ```sh
 ./bin/analyser --help
 ```
+
+## y u use js
+Because I'm a lazy son of a gun. I realise that this page tries to download like 164 KB of Javascript. It's a mess. I'm working on server-rendering the sentiment analysis page but Go's templating language isn't very nice (in my opinion).

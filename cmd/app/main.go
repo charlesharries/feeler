@@ -48,5 +48,5 @@ func main() {
 	router.HandleFunc("/", home(app))
 	router.HandleFunc("/sentiments", sentiments(app))
 
-	http.ListenAndServe("localhost:3001", router)
+	log.Fatal(http.ListenAndServe("localhost:3001", router))
 }
