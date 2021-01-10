@@ -8,6 +8,7 @@ import (
 
 	"github.com/charlesharries/feeler/pkg/afinn"
 	"github.com/charlesharries/feeler/pkg/sentiment"
+	"github.com/lpar/gzipped/v2"
 )
 
 // application holds most of our state that we'll need across the whole app.
@@ -41,7 +42,7 @@ func main() {
 	}
 
 	// Handle static assets.
-	fileServer := http.FileServer(http.Dir("./static"))
+	fileServer := gzipped.FileServer(gzipped.Dir("./static"))
 	router.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	// Handle routes.
